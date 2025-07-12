@@ -4,33 +4,26 @@ library(tidytext)
 library(syuzhet)
 library(ggplot2)
 
-# Load the dataset
+
 data <- read.csv("/mnt/data/twitter_training.csv", header = TRUE, stringsAsFactors = FALSE)
 
-# Check the structure of the dataset
 str(data)
 
-# Assuming the text column is named 'text', adjust accordingly
 colnames(data)[1:5]  # Print column names to identify the correct text column
 
-# Preprocess text data
 data_clean <- data %>%
   select(text = V4) %>%  # Adjust the column index if necessary
   mutate(text = tolower(text),
          text = gsub("[^a-zA-Z ]", "", text),  # Remove special characters
          text = removeWords(text, stopwords("en")))  # Remove stop words
 
-# Perform sentiment analysis using syuzhet
 data_clean$sentiment <- get_nrc_sentiment(data_clean$text)
 
-# Aggregate sentiment scores
 sentiment_scores <- colSums(data_clean$sentiment)
 
-# Convert to data frame for visualization
 sentiment_df <- data.frame(sentiment = names(sentiment_scores),
                            score = sentiment_scores)
 
-# Visualize sentiment distribution
 ggplot(sentiment_df, aes(x = sentiment, y = score, fill = sentiment)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
